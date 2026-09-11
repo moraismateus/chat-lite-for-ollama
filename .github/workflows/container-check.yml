@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Build image
         run: docker build --tag chat-lite-for-ollama:test .
       - name: Start container
@@ -24,7 +24,7 @@ jobs:
           --add-host host.docker.internal:host-gateway
           chat-lite-for-ollama:test
       - name: Check health endpoint
-        run: curl --fail --retry 10 --retry-delay 1 --retry-connrefused http://127.0.0.1:18080/health
+        run: curl --fail --retry 10 --retry-delay 1 --retry-all-errors http://127.0.0.1:18080/health
       - name: Show logs on failure
         if: failure()
         run: docker logs chat-lite-for-ollama-test || true
