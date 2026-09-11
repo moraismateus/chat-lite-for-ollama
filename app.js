@@ -81,27 +81,15 @@ function getThinkingParagraphs(thinking) {
     .filter(Boolean);
 }
 
-function modelUsesEffortLevels(modelName) {
-  const modelBase = modelName.toLowerCase().split(':')[0].split('/').pop();
-  return modelBase === 'gpt-oss';
-}
-
 function configureReasoningOptions(preference = reasoningElement.dataset.preference || 'false') {
-  let options;
-  if (thinkingMode === 'levels') {
-    options = [
+  const options = thinkingMode === 'levels'
+    ? [
+      { value: 'false', label: 'Off' },
       { value: 'low', label: 'Low' },
       { value: 'medium', label: 'Medium' },
       { value: 'high', label: 'High' }
-    ];
-  } else if (thinkingMode === 'toggle') {
-    options = [
-      { value: 'false', label: 'Off' },
-      { value: 'true', label: 'On' }
-    ];
-  } else {
-    options = [{ value: 'false', label: 'Off' }];
-  }
+    ]
+    : [{ value: 'false', label: 'Off' }];
 
   reasoningElement.replaceChildren();
   for (const item of options) {
@@ -112,9 +100,9 @@ function configureReasoningOptions(preference = reasoningElement.dataset.prefere
   }
 
   if (thinkingMode === 'levels') {
-    reasoningElement.value = ['low', 'medium', 'high'].includes(preference) ? preference : 'medium';
-  } else if (thinkingMode === 'toggle') {
-    reasoningElement.value = ['true', 'low', 'medium', 'high'].includes(preference) ? 'true' : 'false';
+    reasoningElement.value = ['false', 'low', 'medium', 'high'].includes(preference)
+      ? preference
+      : 'medium';
   } else {
     reasoningElement.value = 'false';
   }
@@ -122,8 +110,7 @@ function configureReasoningOptions(preference = reasoningElement.dataset.prefere
 }
 
 function getThinkValue() {
-  if (thinkingMode === 'levels') return reasoningElement.value;
-  if (thinkingMode === 'toggle') return reasoningElement.value === 'true';
+  if (thinkingMode === 'levels' && reasoningElement.value !== 'false') return reasoningElement.value;
   return false;
 }
 
@@ -250,7 +237,7 @@ async function updateThinkingSupport(preference = reasoningElement.dataset.prefe
     const data = await response.json();
     if (requestVersion !== thinkingRequestVersion || selectedModel !== modelElement.value) return;
     if (Array.isArray(data.capabilities) && data.capabilities.includes('thinking')) {
-      thinkingMode = modelUsesEffortLevels(selectedModel) ? 'levels' : 'toggle';
+      thinkingMode = 'levels';
     }
   } catch {
     if (requestVersion !== thinkingRequestVersion || selectedModel !== modelElement.value) return;
@@ -260,11 +247,8 @@ async function updateThinkingSupport(preference = reasoningElement.dataset.prefe
   configureReasoningOptions(preference);
   const reasoningLabel = reasoningElement.parentElement;
   if (thinkingMode === 'levels') {
-    reasoningLabel.title = 'Choose the GPT-OSS reasoning effort';
+    reasoningLabel.title = 'Turn thinking off or choose its reasoning effort';
     reasoningElement.setAttribute('aria-label', 'Thinking effort');
-  } else if (thinkingMode === 'toggle') {
-    reasoningLabel.title = 'Turn model reasoning on or off';
-    reasoningElement.setAttribute('aria-label', 'Thinking');
   } else {
     reasoningLabel.title = 'This model does not support thinking';
     reasoningElement.setAttribute('aria-label', 'Thinking unavailable');

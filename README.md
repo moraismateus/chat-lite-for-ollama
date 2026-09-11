@@ -6,7 +6,7 @@ A tiny, private web chat for [Ollama](https://ollama.com/) with zero JavaScript 
 
 - Streaming chat through Ollama's native API
 - Automatic model discovery
-- Model-aware thinking controls: On/Off for most thinking models and low/medium/high effort for GPT-OSS
+- Model-aware thinking controls: Off or low/medium/high effort for thinking-capable Ollama models
 - Concise, balanced, and detailed answer styles
 - Stop-generation control
 - Browser-local chat history with no analytics or telemetry
