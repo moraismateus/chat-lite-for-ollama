@@ -6,10 +6,13 @@ const statusElement = document.querySelector('#status');
 const reasoningElement = document.querySelector('#reasoning');
 const answerStyleElement = document.querySelector('#answer-style');
 const clearElement = document.querySelector('#clear');
+const themeElement = document.querySelector('#theme');
+const themeColorElement = document.querySelector('#theme-color');
 const historyNoticeElement = document.querySelector('#history-notice');
 
 const storageKey = 'chat-lite-for-ollama:v1';
 const legacyStorageKey = 'ollama-chat-ui';
+const themeStorageKey = 'chat-lite-for-ollama:theme';
 const answerStyleInstructions = {
   concise: 'Give a concise, direct answer. Prefer a few short paragraphs and include only the most relevant details.',
   balanced: 'Give a clear answer with moderate detail. Explain the important points without unnecessary repetition.',
@@ -22,6 +25,33 @@ let thinkingMode = 'none';
 let activeRequestController = null;
 let pendingMessageFrame = null;
 let thinkingRequestVersion = 0;
+
+function getPreferredTheme() {
+  try {
+    const savedTheme = localStorage.getItem(themeStorageKey);
+    if (['light', 'dark'].includes(savedTheme)) return savedTheme;
+  } catch {
+    // The theme can still be changed for the current session.
+  }
+  return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function applyTheme(theme, persist = false) {
+  const isLight = theme === 'light';
+  document.documentElement.dataset.theme = isLight ? 'light' : 'dark';
+  themeElement.textContent = isLight ? '☾' : '☀';
+  themeElement.setAttribute('aria-label', isLight ? 'Use dark theme' : 'Use light theme');
+  themeElement.title = isLight ? 'Use dark theme' : 'Use light theme';
+  themeColorElement.content = isLight ? '#f3f7f5' : '#08110f';
+
+  if (persist) {
+    try {
+      localStorage.setItem(themeStorageKey, isLight ? 'light' : 'dark');
+    } catch {
+      // Keep the selected theme for this session when storage is unavailable.
+    }
+  }
+}
 
 function loadHistory() {
   try {
@@ -396,6 +426,7 @@ async function generate() {
   }
 }
 
+applyTheme(getPreferredTheme());
 const preferredModel = loadHistory();
 render({ scrollToEnd: true });
 loadModels(preferredModel);
@@ -428,6 +459,10 @@ reasoningElement.addEventListener('change', () => {
 });
 
 answerStyleElement.addEventListener('change', saveHistory);
+themeElement.addEventListener('click', () => {
+  const nextTheme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  applyTheme(nextTheme, true);
+});
 clearElement.addEventListener('click', () => {
   messages = [];
   saveHistory();

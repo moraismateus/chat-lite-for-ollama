@@ -10,6 +10,7 @@ A tiny, private web chat for [Ollama](https://ollama.com/) with zero JavaScript 
 - Concise, balanced, and detailed answer styles
 - Stop-generation control
 - Browser-local chat history with no analytics or telemetry
+- Light and dark themes with a saved preference
 - Responsive, keyboard-friendly interface
 - Configurable Ollama server with a same-origin Nginx proxy
 
