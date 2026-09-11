@@ -1,0 +1,12 @@
+name: chat-lite-for-ollama
+
+services:
+  chat:
+    build: .
+    ports:
+      - "127.0.0.1:${CHAT_LITE_PORT:-3000}:8080"
+    environment:
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
